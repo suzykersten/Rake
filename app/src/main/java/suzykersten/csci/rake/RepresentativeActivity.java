@@ -27,8 +27,11 @@ public class RepresentativeActivity extends Activity {
 //    Cache cache = new DiskBasedCache( getApplicationContext().getCacheDir(), 1024*1024);
 //    Network network = new BasicNetwork(new HurlStack());
 
-    String url = "http://ip.jsontest.com/";
-
+//    String url = "http://ip.jsontest.com/";
+    String key = "AIzaSyBm7xKa2dCeg3nvNzWr_FLWr6PsD3d-U3A";
+    String googleApiRepByAddr = "https://www.googleapis.com/civicinfo/v2/representatives";
+    String address = "1237 Rossview Rd";
+    //https://www.googleapis.com/civicinfo/v2/representatives?address=1237 Rossview Rd&key=AIzaSyBm7xKa2dCeg3nvNzWr_FLWr6PsD3d-U3A works
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,7 @@ public class RepresentativeActivity extends Activity {
 //        requestQueue = new RequestQueue(cache, network);
         Log.i(TAG_REP_ACT, "onCreate");
 
+        String url = googleApiRepByAddr + "?address="+address+"&key="+key;
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new JsonRepResListener(), new JsonRepResErrListener());
         jsonObjectRequest.setTag(TAG_REP_ACT);
 //        requestQueue.add(jsonObjectRequest);
@@ -57,6 +61,7 @@ public class RepresentativeActivity extends Activity {
         @Override
         public void onResponse(JSONObject response) {
             Log.i(TAG_REP_ACT, "onResponse, response = " + response);
+            ((TextView) findViewById(R.id.textView_rep)).setText(response.toString());
         }
     }
 
