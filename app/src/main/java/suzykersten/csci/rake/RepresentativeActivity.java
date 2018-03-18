@@ -23,9 +23,9 @@ public class RepresentativeActivity extends Activity {
     public static final String TAG_REP_ACT = "REP_ACT";
 
     // Volley stuff
-    RequestQueue requestQueue;
-    Cache cache = new DiskBasedCache( getApplicationContext().getCacheDir(), 1024*1024);
-    Network network = new BasicNetwork(new HurlStack());
+//    RequestQueue requestQueue;
+//    Cache cache = new DiskBasedCache( getApplicationContext().getCacheDir(), 1024*1024);
+//    Network network = new BasicNetwork(new HurlStack());
 
     String url = "http://ip.jsontest.com/";
 
@@ -34,11 +34,13 @@ public class RepresentativeActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_representative);
-        requestQueue = new RequestQueue(cache, network);
+//        requestQueue = new RequestQueue(cache, network);
         Log.i(TAG_REP_ACT, "onCreate");
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new JsonRepResListener(), new JsonRepResErrListener());
         jsonObjectRequest.setTag(TAG_REP_ACT);
+//        requestQueue.add(jsonObjectRequest);
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(jsonObjectRequest);
     }
 
@@ -46,9 +48,9 @@ public class RepresentativeActivity extends Activity {
     protected void onStop() {
         super.onStop();
         // In your activity's onStop() method, cancel all requests that have this tag.
-        if (requestQueue != null) {
-            requestQueue.cancelAll(TAG_REP_ACT);
-        }
+//        if (requestQueue != null) {
+//            requestQueue.cancelAll(TAG_REP_ACT);
+//        }
     }
 
     private class JsonRepResListener implements Response.Listener<JSONObject>{
