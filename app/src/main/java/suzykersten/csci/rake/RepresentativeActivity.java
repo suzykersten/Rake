@@ -1,10 +1,13 @@
 package suzykersten.csci.rake;
 
 import android.app.Activity;
+import android.app.ListActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Cache;
@@ -19,7 +22,11 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Vector;
 
 public class RepresentativeActivity extends Activity {
     public static final String TAG_REP_ACT = "REP_ACT";
@@ -71,6 +78,23 @@ public class RepresentativeActivity extends Activity {
         public void onResponse(JSONObject response) {
             Log.i(TAG_REP_ACT, "onResponse, response = " + response);
             ((TextView) findViewById(R.id.textView_rep)).setText(response.toString());
+
+            // fill a vector with officials
+            try {
+                JSONArray jsonArray = response.getJSONArray("officials");
+//                Vector<JSONObject> vecOfficials = new Vector<>();
+                Vector<String> vecOfficialsNames = new Vector<>();
+                for (int i = 0; i < jsonArray.length(); i++){
+//                    vecOfficials.add(jsonArray.getJSONObject(i));
+                    Log.i(TAG_REP_ACT, "jsonArray.getJSONObject(i).get(\"name\").toString() = " + jsonArray.getJSONObject(i).get("name").toString());
+                    vecOfficialsNames.add(jsonArray.getJSONObject(i).get("name").toString());
+                }
+                ListView listView = findViewById(R.id.listView_reps);
+                listView.setAdapter(new ArrayAdapter<>(getApplicationContext(),android.R.layout.simple_list_item_1, vecOfficialsNames));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
