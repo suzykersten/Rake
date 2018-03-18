@@ -79,7 +79,7 @@ public class RepresentativeActivity extends Activity {
         @Override
         public void onErrorResponse(VolleyError error) {
             Log.i(TAG_REP_ACT, "onErrorResponse, error = " + error);
-            ((TextView) findViewById(R.id.textView_rep)).setText(error.toString());
+            ((TextView) findViewById(R.id.textView_rep)).setText("Address not found. Sorry!");
         }
     }
 }
