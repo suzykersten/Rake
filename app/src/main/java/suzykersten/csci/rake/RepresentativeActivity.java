@@ -3,6 +3,8 @@ package suzykersten.csci.rake;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.Cache;
@@ -40,12 +42,19 @@ public class RepresentativeActivity extends Activity {
 //        requestQueue = new RequestQueue(cache, network);
         Log.i(TAG_REP_ACT, "onCreate");
 
-        String url = googleApiRepByAddr + "?address="+address+"&key="+key;
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new JsonRepResListener(), new JsonRepResErrListener());
-        jsonObjectRequest.setTag(TAG_REP_ACT);
+        // activate the get reps by addr button
+        findViewById(R.id.button_get_reps_for_addr).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                address = ((EditText) findViewById(R.id.editText_address)).getText().toString();
+                String url = googleApiRepByAddr + "?address="+address+"&key="+key;
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new JsonRepResListener(), new JsonRepResErrListener());
+                jsonObjectRequest.setTag(TAG_REP_ACT);
 //        requestQueue.add(jsonObjectRequest);
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(jsonObjectRequest);
+                RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+                requestQueue.add(jsonObjectRequest);
+            }
+        });
     }
 
     @Override
@@ -70,6 +79,7 @@ public class RepresentativeActivity extends Activity {
         @Override
         public void onErrorResponse(VolleyError error) {
             Log.i(TAG_REP_ACT, "onErrorResponse, error = " + error);
+            ((TextView) findViewById(R.id.textView_rep)).setText(error.toString());
         }
     }
 }
