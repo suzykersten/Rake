@@ -69,7 +69,7 @@ public class RepresentativeActivity extends Activity {
         super.onStop();
         // In your activity's onStop() method, cancel all requests that have this tag.
 //        if (requestQueue != null) {
-//            requestQueue.cancelAll(TAG_REP_ACT);
+//            requestQueue.cancelAll(TAG_BILL_ACT);
 //        }
     }
 
