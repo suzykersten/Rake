@@ -2,6 +2,8 @@ package suzykersten.csci.rake;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -189,6 +191,16 @@ class BillAdapter extends ArrayAdapter<Bill>{
         final Bill bill = data.get(position);
         setTextOfTextView(convertView, R.id.textView_title, bill.getTitle());
         setTextOfTextView(convertView, R.id.textView_date, bill.getActionDate());
+
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(bill.getLinkToFull()));
+                getContext().startActivity(intent);
+
+            }
+        });
 
         return convertView;
     }
