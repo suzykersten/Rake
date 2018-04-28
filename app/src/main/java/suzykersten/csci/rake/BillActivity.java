@@ -45,31 +45,12 @@ public class BillActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bill);
 
-        findViewById(R.id.button_getBill).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getBillData();
-            }
-        });
-    }
-
-
-
-
-    private void getBillData(){
-
-
-
-
+        //Populate the Listview with new data
         ListView listView = findViewById(R.id.listView_bills);
         DownloadBills dlBills = new DownloadBills("https://sskersten.bitbucket.io/json/hr.json", listView);
 
         dlBills.execute();
-
-        //((TextView) findViewById(R.id.textView_billOutput)).setText(result);
     }
-
-
 }
 
 
@@ -124,8 +105,6 @@ class DownloadBills extends AsyncTask<String, Integer, Bill[]>{
         } finally {
             urlConnection.disconnect();
         }
-
-        //Log.e("result", result);
 
         //convert gotten json to Bills objects
         Gson gson = new Gson();
