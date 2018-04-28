@@ -5,8 +5,11 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -35,7 +38,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Vector;
@@ -154,7 +160,7 @@ class DownloadBills extends AsyncTask<String, Integer, Bill[]>{
     //update the layout with the requested set of bills
     @Override
     protected void onPostExecute(Bill[] bills) {
-        listView.setAdapter(new ArrayAdapter<>(listView.getContext(),android.R.layout.simple_list_item_1, bills));
+        listView.setAdapter(new BillAdapter(listView.getContext(), Arrays.asList(bills)));
     }
 
     @Override
@@ -163,3 +169,31 @@ class DownloadBills extends AsyncTask<String, Integer, Bill[]>{
     }
 }
 
+
+class BillAdapter extends ArrayAdapter<Bill>{
+    private List<Bill> data;
+
+    BillAdapter(Context context, List<Bill> data){
+        super(context, R.layout.activity_bill_listrow, data);
+        this.data = data;
+    }
+
+    @NonNull
+    @Override
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+        if (convertView == null){
+            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.activity_bill_listrow, parent, false);
+        }
+
+        final Bill bill = data.get(position);
+        setTextOfTextView(convertView, R.id.textView_title, bill.getTitle());
+        setTextOfTextView(convertView, R.id.textView_date, bill.getActionDate());
+
+        return convertView;
+    }
+
+    private void setTextOfTextView(View view, int id, String text){
+        ((TextView) view.findViewById(id)).setText(text);
+    }
+}
