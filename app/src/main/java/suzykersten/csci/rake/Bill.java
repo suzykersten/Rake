@@ -96,7 +96,7 @@ public class Bill implements Comparable<Bill>{
     }
 
     public String toString(){
-        return title + " : " + chamber + " : " + stage + " : " + actionDate;
+        return title + " : "  + actionDate;
     }
 
     @Override

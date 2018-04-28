@@ -2,12 +2,20 @@ package suzykersten.csci.rake;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -32,44 +40,65 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Vector;
 
 public class BillActivity extends Activity {
-    public static final String TAG_BILL_ACT = "BILL_ACT";
+    private SparseArray<String> urls;
+    private DownloadBills dlBills = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bill);
 
-        findViewById(R.id.button_getBill).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getBillData();
-            }
-        });
+        //set up every button with the url that should work for them
+        urls = new SparseArray<>();
+        urls.append(    R.id.button_hconres,    "https://sskersten.bitbucket.io/json/hconres.json"  );
+        urls.append(    R.id.button_hjres,      "https://sskersten.bitbucket.io/json/hjres.json"    );
+        urls.append(    R.id.button_hr,         "https://sskersten.bitbucket.io/json/hr.json"       );
+        urls.append(    R.id.button_hres,       "https://sskersten.bitbucket.io/json/hres.json"     );
+        urls.append(    R.id.button_s,          "https://sskersten.bitbucket.io/json/s.json"        );
+        urls.append(    R.id.button_sconres,    "https://sskersten.bitbucket.io/json/sconres.json"  );
+        urls.append(    R.id.button_sjres,      "https://sskersten.bitbucket.io/json/sjres.json"    );
+        urls.append(    R.id.button_sres,       "https://sskersten.bitbucket.io/json/sres.json"     );
+
+        //setup the onclicks for every button to work for the url needed on each one
+        LinearLayout billUrlButtons = findViewById(R.id.linearLayout_billUrlButtons);
+
+        //for each child of the billURLButtons layout, set the button on click listener
+        for (int i = 0; i < billUrlButtons.getChildCount(); i++){
+            billUrlButtons.getChildAt(i).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    updateListViewWithDataFromUrl(view.getId());
+                }
+            });
+        }
+
+        //default by putting out hconres bills
+        updateListViewWithDataFromUrl(R.id.button_hconres);
+
     }
 
+    private void updateListViewWithDataFromUrl(int buttonId){
+        //Log.i("dlbills", "Trying to access data from " + )
 
-
-
-    private void getBillData(){
-
-
-
+        //if we're trying to download data, stop that and exit.
+        if (dlBills != null){
+            dlBills.cancel(true);
+            dlBills = null;
+        }
 
         ListView listView = findViewById(R.id.listView_bills);
-        DownloadBills dlBills = new DownloadBills("https://sskersten.bitbucket.io/json/hr.json", listView);
-
+        dlBills = new DownloadBills(urls.get(buttonId), listView);
         dlBills.execute();
-
-        //((TextView) findViewById(R.id.textView_billOutput)).setText(result);
     }
-
-
 }
 
 
@@ -125,8 +154,6 @@ class DownloadBills extends AsyncTask<String, Integer, Bill[]>{
             urlConnection.disconnect();
         }
 
-        //Log.e("result", result);
-
         //convert gotten json to Bills objects
         Gson gson = new Gson();
         return gson.fromJson(result, Bill[].class);
@@ -135,7 +162,7 @@ class DownloadBills extends AsyncTask<String, Integer, Bill[]>{
     //update the layout with the requested set of bills
     @Override
     protected void onPostExecute(Bill[] bills) {
-        listView.setAdapter(new ArrayAdapter<>(listView.getContext(),android.R.layout.simple_list_item_1, bills));
+        listView.setAdapter(new BillAdapter(listView.getContext(), Arrays.asList(bills)));
     }
 
     @Override
@@ -144,3 +171,41 @@ class DownloadBills extends AsyncTask<String, Integer, Bill[]>{
     }
 }
 
+
+class BillAdapter extends ArrayAdapter<Bill>{
+    private List<Bill> data;
+
+    BillAdapter(Context context, List<Bill> data){
+        super(context, R.layout.activity_bill_listrow, data);
+        this.data = data;
+    }
+
+    @NonNull
+    @Override
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+        if (convertView == null){
+            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.activity_bill_listrow, parent, false);
+        }
+
+        final Bill bill = data.get(position);
+        setTextOfTextView(convertView, R.id.textView_title, bill.getTitle());
+        setTextOfTextView(convertView, R.id.textView_date, bill.getActionDate());
+
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(bill.getLinkToFull()));
+                getContext().startActivity(intent);
+
+            }
+        });
+
+        return convertView;
+    }
+
+    private void setTextOfTextView(View view, int id, String text){
+        ((TextView) view.findViewById(id)).setText(text);
+    }
+}
