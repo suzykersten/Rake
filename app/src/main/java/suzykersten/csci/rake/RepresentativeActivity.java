@@ -170,7 +170,9 @@ public class RepresentativeActivity extends Activity {
 
                 // set the adapter for the officers
 //                officialsListView.setAdapter(new ArrayAdapter<>(getApplicationContext(),android.R.layout.simple_list_item_1, officialsVector));
-                officialsListView.setAdapter(new RepresentativeListAdapter(officialsVector, getApplicationContext(), R.id.listView_reps));
+//        public RepresentativeListAdapter(@NonNull Context context, int resource, int textViewResourceId, Vector<Official> officials ) {
+
+                officialsListView.setAdapter(new RepresentativeListAdapter(getApplicationContext(), R.layout.rep_row_item, R.id.listView_reps, officialsVector));
 
                 // set the OnItemClickListener for handle user 'taps' on the items in the list
 //                officialsListView.setOnItemClickListener(new OfficialsItemClickedExample());
@@ -249,10 +251,13 @@ public class RepresentativeActivity extends Activity {
         private Vector<Official> officials;
         private Context mContext;
 
-        public RepresentativeListAdapter(Vector<Official> officials, @NonNull Context context, int resource) {
-            super(context, resource);
+        public RepresentativeListAdapter(@NonNull Context context, int resource, int textViewResourceId, Vector<Official> officials ) {
+            super(context, resource, textViewResourceId, officials); //https://stackoverflow.com/questions/9730328/the-getview-method-of-arrayadapter-is-not-getting-called
             this.officials = officials;
             this.mContext = context;
+            Log.i(TAG_REP_ACT, "officials = " + officials);
+            Log.i(TAG_REP_ACT, "context = " + context);
+            Log.i(TAG_REP_ACT, "resource = " + resource);
         }
 
         @NonNull
@@ -260,6 +265,7 @@ public class RepresentativeActivity extends Activity {
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 
             Official official = officials.get(position);
+            Log.i(TAG_REP_ACT, "official = " + official);
 
             // build list item
             View listViewItem = LayoutInflater.from(mContext).inflate(R.layout.rep_row_item, parent, false);
