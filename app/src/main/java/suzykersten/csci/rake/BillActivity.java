@@ -6,8 +6,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -38,17 +41,54 @@ import java.util.Scanner;
 import java.util.Vector;
 
 public class BillActivity extends Activity {
-    public static final String TAG_BILL_ACT = "BILL_ACT";
+    private SparseArray<String> urls;
+    private DownloadBills dlBills = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bill);
 
-        //Populate the Listview with new data
-        ListView listView = findViewById(R.id.listView_bills);
-        DownloadBills dlBills = new DownloadBills("https://sskersten.bitbucket.io/json/hr.json", listView);
+        //set up every button with the url that should work for them
+        urls = new SparseArray<>();
+        urls.append(    R.id.button_hconres,    "https://sskersten.bitbucket.io/json/hconres.json"  );
+        urls.append(    R.id.button_hjres,      "https://sskersten.bitbucket.io/json/hjres.json"    );
+        urls.append(    R.id.button_hr,         "https://sskersten.bitbucket.io/json/hr.json"       );
+        urls.append(    R.id.button_hres,       "https://sskersten.bitbucket.io/json/hres.json"     );
+        urls.append(    R.id.button_s,          "https://sskersten.bitbucket.io/json/s.json"        );
+        urls.append(    R.id.button_sconres,    "https://sskersten.bitbucket.io/json/sconres.json"  );
+        urls.append(    R.id.button_sjres,      "https://sskersten.bitbucket.io/json/sjres.json"    );
+        urls.append(    R.id.button_sres,       "https://sskersten.bitbucket.io/json/sres.json"     );
 
+        //setup the onclicks for every button to work for the url needed on each one
+        LinearLayout billUrlButtons = findViewById(R.id.linearLayout_billUrlButtons);
+
+        //for each child of the billURLButtons layout, set the button on click listener
+        for (int i = 0; i < billUrlButtons.getChildCount(); i++){
+            billUrlButtons.getChildAt(i).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    updateListViewWithDataFromUrl(view.getId());
+                }
+            });
+        }
+
+        //default by putting out hconres bills
+        updateListViewWithDataFromUrl(R.id.button_hconres);
+
+    }
+
+    private void updateListViewWithDataFromUrl(int buttonId){
+        //Log.i("dlbills", "Trying to access data from " + )
+
+        //if we're trying to download data, stop that and exit.
+        if (dlBills != null){
+            dlBills.cancel(true);
+            dlBills = null;
+        }
+
+        ListView listView = findViewById(R.id.listView_bills);
+        dlBills = new DownloadBills(urls.get(buttonId), listView);
         dlBills.execute();
     }
 }
