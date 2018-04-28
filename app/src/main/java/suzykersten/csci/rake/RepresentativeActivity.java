@@ -2,14 +2,20 @@ package suzykersten.csci.rake;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -24,6 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.Vector;
 
 public class RepresentativeActivity extends Activity {
@@ -41,7 +48,8 @@ public class RepresentativeActivity extends Activity {
     //https://www.googleapis.com/civicinfo/v2/representatives?address=1237 Rossview Rd&key=AIzaSyBm7xKa2dCeg3nvNzWr_FLWr6PsD3d-U3A works
     private ListView officialsListView;
     private TextView rawTextTextView;
-    private Vector<String> officialsVector;
+//    private Vector<String> officialsVector;
+    private Vector<Official> officialsVector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,23 +113,67 @@ public class RepresentativeActivity extends Activity {
 
             // fill a vector with officials
             try {
-                JSONArray jsonArray = response.getJSONArray("officials");
+                JSONArray jsonArrayOfficials = response.getJSONArray("officials");
+                JSONArray jsonArrayOffices = response.getJSONArray("offices");
+
+                // array for the Indices positions
+                String name = "";
+                String position = "";
+                String photoUrl = "";
 
                 // for each entry in the JSONArray
-                for (int i = 0; i < jsonArray.length(); i++){
+                for (int i = 0; i < jsonArrayOfficials.length(); i++){
 
                     // Log for debugging the list adds
-                    Log.i(TAG_REP_ACT, "jsonArray.getJSONObject(i).get(\"name\").toString() = " + jsonArray.getJSONObject(i).get("name").toString());
+                    Log.i(TAG_REP_ACT, "jsonArray.getJSONObject(i).get(\"name\").toString() = " + jsonArrayOfficials.getJSONObject(i).get("name").toString());
 
                     // add to the array
-                    officialsVector.add(jsonArray.getJSONObject(i).get("name").toString());
+                    name = jsonArrayOfficials.getJSONObject(i).get("name").toString();
+                    try {
+                        photoUrl = jsonArrayOfficials.getJSONObject(i).get("photoUrl").toString();
+                    } catch (JSONException e){
+                        Log.e(TAG_REP_ACT, "no val for photo URL");
+                        photoUrl = "";
+                    }
+
+                    officialsVector.add( new Official(name, photoUrl) );
                 }
 
+                // Now we modify the officials array to 'append' the position
+                JSONObject jsonObject;
+                String officeName;
+                int index;
+                String str;
+                String jsonArrayOfficalIndices;
+                String[] strings;
+                Log.i(TAG_REP_ACT, "jsonArrayOffices.length() = " + jsonArrayOffices.length());
+
+                for (int i = 0; i < jsonArrayOffices.length(); i++){
+                    jsonObject = jsonArrayOffices.getJSONObject(i);
+                    officeName = jsonObject.get("name").toString();
+                    jsonArrayOfficalIndices = jsonObject.get("officialIndices").toString().trim();
+                    strings = jsonArrayOfficalIndices.split("[\\[,\\] ]");
+                    Log.i(TAG_REP_ACT, "jsonArrayOfficalIndices = " + jsonArrayOfficalIndices);
+
+                    for (int j = 1; j < strings.length; j++){
+                        Log.i(TAG_REP_ACT, "strings = '" + strings[j] + "'");
+
+//                        str =.toString();
+//                        Log.i(TAG_REP_ACT, "str = " + str);
+                        index = Integer.parseInt(strings[j]);
+                        Log.i(TAG_REP_ACT, "index = " + index);
+                        officialsVector.get(index).setPosition(officeName);
+                    }
+                }
+
+                Log.i(TAG_REP_ACT, "officialsVector = " + officialsVector);
+
                 // set the adapter for the officers
-                officialsListView.setAdapter(new ArrayAdapter<>(getApplicationContext(),android.R.layout.simple_list_item_1, officialsVector));
+//                officialsListView.setAdapter(new ArrayAdapter<>(getApplicationContext(),android.R.layout.simple_list_item_1, officialsVector));
+                officialsListView.setAdapter(new RepresentativeListAdapter(officialsVector, getApplicationContext(), R.id.listView_reps));
 
                 // set the OnItemClickListener for handle user 'taps' on the items in the list
-                officialsListView.setOnItemClickListener(new OfficialsItemClickedExample());
+//                officialsListView.setOnItemClickListener(new OfficialsItemClickedExample());
             } catch (JSONException e) {
                 Log.e(TAG_REP_ACT, "Error in listening to representative response");
                 e.printStackTrace();
@@ -165,13 +217,13 @@ public class RepresentativeActivity extends Activity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
             // get the string
-            String itemInOfficialsVector = officialsVector.get(position);
+//            String itemInOfficialsVector = officialsVector.get(position);
 
             // log the to console the name
-            Log.d(TAG_REP_ACT, "itemInOfficialsVector = " + itemInOfficialsVector);
+//            Log.d(TAG_REP_ACT, "itemInOfficialsVector = " + itemInOfficialsVector);
 
             // search it!
-            searchWeb(itemInOfficialsVector);
+//            searchWeb(itemInOfficialsVector);
 
         }
 
@@ -181,6 +233,93 @@ public class RepresentativeActivity extends Activity {
             Intent searchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
             searchIntent.putExtra(SearchManager.QUERY, query);
             startActivity(searchIntent);
+        }
+    }
+
+    // ============================
+    // === CUSTOM ADAPTER ITEMS ===
+    // ============================
+
+    /**
+     * Source: https://www.journaldev.com/10416/android-listview-with-custom-adapter-example-tutorial
+     *
+     */
+    private class RepresentativeListAdapter extends ArrayAdapter<Official>{
+
+        private Vector<Official> officials;
+        private Context mContext;
+
+        public RepresentativeListAdapter(Vector<Official> officials, @NonNull Context context, int resource) {
+            super(context, resource);
+            this.officials = officials;
+            this.mContext = context;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+            Official official = officials.get(position);
+
+            // build list item
+            View listViewItem = LayoutInflater.from(mContext).inflate(R.layout.rep_row_item, parent, false);
+
+            // set the name
+            ( (TextView) listViewItem.findViewById(R.id.textview_official_name)).setText(official.getName());
+
+            // set the position
+            ( (TextView) listViewItem.findViewById(R.id.textview_official_name)).setText(official.getPosition());
+
+            return listViewItem;
+        }
+    }
+
+    /**
+     * Java model of an official for the user, such as President of US or Comptroller of county
+     */
+    private class Official{
+        private String name;
+        private String position;
+        private String photoUrl;
+
+        public Official(String name, String photoUrl, String position){
+            this.name = name;
+            this.position = position;
+            this.photoUrl = photoUrl;
+        }
+
+        public Official(String name, String photoUrl){
+            this.name = name;
+            this.photoUrl = photoUrl;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getPosition() {
+            return position;
+        }
+
+        public void setPosition(String position) {
+            this.position = position;
+        }
+
+        public String getPhotoUrl() {
+            return photoUrl;
+        }
+
+        public void setPhotoUrl(String photoUrl) {
+            this.photoUrl = photoUrl;
+        }
+
+        @Override
+        public String toString() {
+            return "name = " + this.name + ", pos = " + this.position + ", photoUrl = " + this.photoUrl;
         }
     }
 }
