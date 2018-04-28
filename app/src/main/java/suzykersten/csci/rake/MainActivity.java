@@ -20,5 +20,18 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
+
+        findViewById(R.id.button_bills).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Transfer to Rep Activity for listing reps
+                Intent intent = new Intent(getApplicationContext(), BillActivity.class);
+                startActivity(intent);
+            }
+        });
     }
+
+
+
+
 }
