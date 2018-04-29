@@ -6,11 +6,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="100dp"
-    android:background="@color/colorAccent">
+    android:background="#AAA">
 
     <ImageView
         android:id="@+id/imageview_official_photo"
-        android:layout_width="80dp"
+        android:layout_width="70dp"
         android:layout_height="match_parent"
         android:layout_margin="5dp"
         android:layout_marginBottom="8dp"

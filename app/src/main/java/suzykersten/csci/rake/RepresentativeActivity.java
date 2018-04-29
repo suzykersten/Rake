@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -33,7 +33,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.Vector;
 
@@ -52,8 +51,9 @@ public class RepresentativeActivity extends Activity {
     //https://www.googleapis.com/civicinfo/v2/representatives?address=1237 Rossview Rd&key=AIzaSyBm7xKa2dCeg3nvNzWr_FLWr6PsD3d-U3A works
     private ListView officialsListView;
     private TextView rawTextTextView;
-//    private Vector<String> officialsVector;
     private Vector<Official> officialsVector;
+    private Vector<ImageView> officialImageViewVector;
+    private Vector<Drawable> officialDrawableVector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +99,8 @@ public class RepresentativeActivity extends Activity {
         officialsListView = findViewById(R.id.listView_reps);
         rawTextTextView = findViewById(R.id.textView_rep);
         officialsVector = new Vector<>();
+        officialImageViewVector = new Vector<>();
+        officialDrawableVector = new Vector<>();
     }
 
     /**
@@ -143,6 +145,15 @@ public class RepresentativeActivity extends Activity {
                     }
 
                     officialsVector.add( new Official(name, photoUrl) );
+
+//                    if (!photoUrl.equals(null) || !photoUrl.equals("")){
+//                        Drawable officalPhoto = getPhotoFromUrl(photoUrl);
+//                        officialDrawableVector.add(officalPhoto);
+//                    } else {
+//                        officialDrawableVector.add(null);
+//                    }
+
+                    Log.i(TAG_REP_ACT, "officialDrawableVector = " + officialDrawableVector);
                 }
 
                 // Now we modify the officials array to 'append' the position
@@ -178,8 +189,12 @@ public class RepresentativeActivity extends Activity {
 //                officialsListView.setAdapter(new ArrayAdapter<>(getApplicationContext(),android.R.layout.simple_list_item_1, officialsVector));
 //        public RepresentativeListAdapter(@NonNull Context context, int resource, int textViewResourceId, Vector<Official> officials ) {
 
-                officialsListView.setAdapter(new RepresentativeListAdapter(getApplicationContext(), R.layout.rep_row_item, R.id.listView_reps, officialsVector));
+//                officialsListView.setAdapter(new RepresentativeListAdapter(getApplicationContext(), R.layout.rep_row_item, R.id.listView_reps, officialsVector));
 
+                GetPhotoFromURLTask getPhotoFromURLTask = new GetPhotoFromURLTask(officialsVector, R.drawable.def_person_photo);
+                getPhotoFromURLTask.execute();
+
+                Log.i(TAG_REP_ACT, "officialImageViewVector = "  + officialImageViewVector.toString());
                 // set the OnItemClickListener for handle user 'taps' on the items in the list
 //                officialsListView.setOnItemClickListener(new OfficialsItemClickedExample());
             } catch (JSONException e) {
@@ -282,24 +297,24 @@ public class RepresentativeActivity extends Activity {
             // set the position
             ( (TextView) listViewItem.findViewById(R.id.textview_official_position)).setText(official.getPosition());
 
+            // get and set the photo
+//            Log.i(TAG_REP_ACT, "official.getPhotoUrl() = " + official.getPhotoUrl());
+//            if (!official.getPhotoUrl().equals(null) || !official.getPhotoUrl().equals("")){
+//                Drawable officalPhoto = getPhotoFromUrl(official.getPhotoUrl());
+//                ((ImageView) listViewItem.findViewById(R.id.imageview_official_photo)).setBackground(officalPhoto);
+//            }
+
+            // add the ImageView HASH to a queue so that an asyncTask can handle filling it off the main UI Thread
+            ImageView imageView = listViewItem.findViewById(R.id.imageview_official_photo);
+            imageView.setBackground(officialDrawableVector.get(position));
+
+//            officialImageViewVector.add(imageView);
+//            Log.i(TAG_REP_ACT, "2 officialImageViewVector = " + officialImageViewVector);
+
             return listViewItem;
         }
 
-        /**
-         * Take Url; grab photo; return photo
-         * @param url
-         * @return
-         */
-        private Drawable getPhotoFromUrl(String url){
-            Drawable drawable = null;
-            try {
-                InputStream is = (InputStream) new URL(url).getContent();
-                drawable = Drawable.createFromStream(is, "PhotoFromUrl");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return drawable;
-        }
+
     }
 
     /**
@@ -350,4 +365,88 @@ public class RepresentativeActivity extends Activity {
             return "name = " + this.name + ", pos = " + this.position + ", photoUrl = " + this.photoUrl;
         }
     }
+
+    /**
+     * Avoid -> NetworkOnMainThreadException
+     */
+    private class GetPhotoFromURLTask extends AsyncTask<Void, Integer, Void>{
+
+        private Vector<Official> officials;
+        Drawable drawable;
+        int defaultImageRes;
+        Drawable defaultDrawable;
+
+        @Override
+        protected void onPreExecute() {
+            drawable = getDrawable(defaultImageRes);
+            super.onPreExecute();
+        }
+
+        public GetPhotoFromURLTask(Vector<Official> officials, int defaultImageRes){
+            this.officials = officials;
+            this.defaultImageRes = defaultImageRes;
+            this.defaultDrawable = getDrawable(defaultImageRes);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            for (int i = 0; i < officials.size(); i++){
+                Log.i(TAG_REP_ACT, "officials.get(i).getPhotoUrl() = " + officials.get(i).getPhotoUrl());
+
+                if ( !officials.get(i).getPhotoUrl().equals("") || !officials.get(i).getPhotoUrl().equals(null) ){
+                    drawable = getPhotoFromUrl(officials.get(i).getPhotoUrl());
+                    officialDrawableVector.add(drawable);
+                } else if (defaultDrawable != null){
+                    officialDrawableVector.add(defaultDrawable);
+                    Log.i(TAG_REP_ACT, "[YES] add to the Drawable vector");
+                } else {
+                    Log.i(TAG_REP_ACT, "[NO]  Did not add to the Drawable vector");
+                }
+
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+//            int index = values[0];
+//            Log.i(TAG_REP_ACT, "index = " + index);
+//            Log.i(TAG_REP_ACT, "officialDrawableVector.size() = " + officialDrawableVector.size());
+//            Log.i(TAG_REP_ACT, "officialImageViewVector.size() = " + officialImageViewVector.size());
+//            if ( officialDrawableVector.get(index) != null ){
+//                officialImageViewVector.get(index).setBackground(officialDrawableVector.get(index));
+//            }
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            officialsListView.setAdapter(new RepresentativeListAdapter(getApplicationContext(), R.layout.rep_row_item, R.id.listView_reps, officialsVector));
+
+            super.onPostExecute(aVoid);
+        }
+
+        /**
+         * Take Url; grab photo; return photo
+         * @param url
+         * @return
+         */
+        private Drawable getPhotoFromUrl(String url){
+            Log.i(TAG_REP_ACT, "getPhotoFromUrl(String url); url = " + url);
+            Drawable drawable = null;
+            try {
+                InputStream is = (InputStream) new URL(url).getContent();
+                drawable = Drawable.createFromStream(is, "PhotoFromUrl");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (drawable == null) {
+                Log.i(TAG_REP_ACT, "drawable is null!");
+            }
+            return drawable;
+        }
+    }
+
+
+
 }
