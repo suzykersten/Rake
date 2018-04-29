@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,7 +31,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.net.URL;
 import java.util.Vector;
 
 public class RepresentativeActivity extends Activity {
@@ -57,13 +61,15 @@ public class RepresentativeActivity extends Activity {
         setContentView(R.layout.activity_representative);
         Log.i(TAG_REP_ACT, "onCreate");
 
-        // setup ListView variables
+        // setup ListView variables to null or empty for safety
         setupVariables();
 
         // activate the get reps by addr button
         findViewById(R.id.button_get_reps_for_addr).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ( (TextView) findViewById(R.id.textView_rep)).setText("Loading...");
+
                 // get address
                 address = ((EditText) findViewById(R.id.editText_address)).getText().toString();
 
@@ -274,9 +280,25 @@ public class RepresentativeActivity extends Activity {
             ( (TextView) listViewItem.findViewById(R.id.textview_official_name)).setText(official.getName());
 
             // set the position
-            ( (TextView) listViewItem.findViewById(R.id.textview_official_name)).setText(official.getPosition());
+            ( (TextView) listViewItem.findViewById(R.id.textview_official_position)).setText(official.getPosition());
 
             return listViewItem;
+        }
+
+        /**
+         * Take Url; grab photo; return photo
+         * @param url
+         * @return
+         */
+        private Drawable getPhotoFromUrl(String url){
+            Drawable drawable = null;
+            try {
+                InputStream is = (InputStream) new URL(url).getContent();
+                drawable = Drawable.createFromStream(is, "PhotoFromUrl");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return drawable;
         }
     }
 
