@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ScaleDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -55,6 +58,8 @@ public class RepresentativeActivity extends Activity {
     private Vector<ImageView> officialImageViewVector;
     private Vector<Drawable> officialDrawableVector;
 
+    private GetPhotoFromURLTask getPhotoFromURLTask;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +73,15 @@ public class RepresentativeActivity extends Activity {
         findViewById(R.id.button_get_reps_for_addr).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                officialDrawableVector.clear();
+                officialsVector.clear();
+                officialImageViewVector.clear();
+
+                if ( getPhotoFromURLTask != null ){
+                    getPhotoFromURLTask.cancel(true);
+                }
+
                 ( (TextView) findViewById(R.id.textView_rep)).setText("Loading...");
 
                 // get address
@@ -117,7 +131,8 @@ public class RepresentativeActivity extends Activity {
             Log.i(TAG_REP_ACT, "onResponse, response = " + response);
 
             // set the upper textview to the string (RAW) JSON response
-            rawTextTextView.setText(response.toString());
+//            rawTextTextView.setText(response.toString());
+            rawTextTextView.setText("Found Address \"" + address + "\"");
 
             // fill a vector with officials
             try {
@@ -306,8 +321,13 @@ public class RepresentativeActivity extends Activity {
 
             // add the ImageView HASH to a queue so that an asyncTask can handle filling it off the main UI Thread
             ImageView imageView = listViewItem.findViewById(R.id.imageview_official_photo);
-            imageView.setBackground(officialDrawableVector.get(position));
-
+            if (officialDrawableVector.size() > 0){
+                try{
+                    imageView.setBackground(officialDrawableVector.get(position));
+                } catch (Exception e){
+                    Log.e(TAG_REP_ACT, "Something went real bad!");
+                }
+            }
 //            officialImageViewVector.add(imageView);
 //            Log.i(TAG_REP_ACT, "2 officialImageViewVector = " + officialImageViewVector);
 
@@ -390,18 +410,25 @@ public class RepresentativeActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            String photoUrl = "";
+            final int REQUIRED_STRING_SIZE = 5;
             for (int i = 0; i < officials.size(); i++){
                 Log.i(TAG_REP_ACT, "officials.get(i).getPhotoUrl() = " + officials.get(i).getPhotoUrl());
+                Log.i(TAG_REP_ACT, "officials.get(i).getPhotoUrl().equals(\"\") = " + officials.get(i).getPhotoUrl().equals(""));
 
-                if ( !officials.get(i).getPhotoUrl().equals("") || !officials.get(i).getPhotoUrl().equals(null) ){
-                    drawable = getPhotoFromUrl(officials.get(i).getPhotoUrl());
+                photoUrl = officials.get(i).getPhotoUrl();
+
+                if ( !photoUrl.equals("") || photoUrl.length() > REQUIRED_STRING_SIZE){
+                    drawable = scaleDownDrawable(getPhotoFromUrl(officials.get(i).getPhotoUrl()));
+//                    drawable = getPhotoFromUrl(officials.get(i).getPhotoUrl());
                     officialDrawableVector.add(drawable);
-                } else if (defaultDrawable != null){
+                } else {
                     officialDrawableVector.add(defaultDrawable);
                     Log.i(TAG_REP_ACT, "[YES] add to the Drawable vector");
-                } else {
-                    Log.i(TAG_REP_ACT, "[NO]  Did not add to the Drawable vector");
                 }
+//                else {
+//                    Log.i(TAG_REP_ACT, "[NO]  Did not add to the Drawable vector");
+//                }
 
             }
             return null;
@@ -433,17 +460,31 @@ public class RepresentativeActivity extends Activity {
          */
         private Drawable getPhotoFromUrl(String url){
             Log.i(TAG_REP_ACT, "getPhotoFromUrl(String url); url = " + url);
-            Drawable drawable = null;
             try {
                 InputStream is = (InputStream) new URL(url).getContent();
                 drawable = Drawable.createFromStream(is, "PhotoFromUrl");
+                is.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             if (drawable == null) {
                 Log.i(TAG_REP_ACT, "drawable is null!");
             }
             return drawable;
+        }
+
+        /**
+         * Scale down an image
+         * Inspiration: https://stackoverflow.com/questions/7021578/resize-drawable-in-android
+         * @param convertDrawable
+         * @return the new Drawable
+         */
+        private Drawable scaleDownDrawable(Drawable convertDrawable){
+            Bitmap convertedBitmap = ((BitmapDrawable)convertDrawable).getBitmap();
+            Bitmap bitmapResized = Bitmap.createScaledBitmap(convertedBitmap, 50, 50, false);
+            BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bitmapResized);
+            return bitmapDrawable;
         }
     }
 

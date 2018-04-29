@@ -10,13 +10,13 @@
 
     <ImageView
         android:id="@+id/imageview_official_photo"
+        android:scaleType="fitCenter"
         android:layout_width="70dp"
         android:layout_height="match_parent"
         android:layout_margin="5dp"
         android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:background="@drawable/def_person_photo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
