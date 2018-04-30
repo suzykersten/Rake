@@ -14,7 +14,6 @@
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
         android:hint="Enter your local address"
-        android:text="1600 Pennsylvania Ave"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView_label_address" />
 
