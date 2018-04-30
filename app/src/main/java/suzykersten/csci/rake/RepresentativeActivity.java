@@ -12,13 +12,15 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -265,12 +267,6 @@ public class RepresentativeActivity extends Activity {
         }
     }
 
-//    private String JSONObjectToString(JSONObject jsonObject){
-//        String strJSONObject =
-////        officeName = jsonObject.get("name").toString();
-////        jsonArrayOfficalIndices = jsonObject.get("officialIndices").toString().trim();
-////        strings = jsonArrayOfficalIndices.split("[\\[,\\] ]");
-//    }
 
     private class JsonRepResErrListener implements Response.ErrorListener {
 
@@ -305,24 +301,29 @@ public class RepresentativeActivity extends Activity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            // get the string
-//            String itemInOfficialsVector = officialsVector.get(position);
+            Log.i(TAG_REP_ACT, "ITEM HIT = " + position);
 
-            // log the to console the name
-//            Log.d(TAG_REP_ACT, "itemInOfficialsVector = " + itemInOfficialsVector);
+//             get the string
+            Official official = officialsVector.get(position);
 
-            // search it!
-//            searchWeb(itemInOfficialsVector);
+//             log the to console the name
+            Log.d(TAG_REP_ACT, "itemInOfficialsVector = " + official);
+
+//             search it!
+//            searchWeb(official.getName());
+
+//            parent.showContextMenuForChild(view);
 
         }
 
-        private void searchWeb(String query){
+    }
 
-            // build Intent for search
-            Intent searchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
-            searchIntent.putExtra(SearchManager.QUERY, query);
-            startActivity(searchIntent);
-        }
+    private void searchWeb(String query){
+
+        // build Intent for search
+        Intent searchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+        searchIntent.putExtra(SearchManager.QUERY, query);
+        startActivity(searchIntent);
     }
 
     // ============================
@@ -333,7 +334,7 @@ public class RepresentativeActivity extends Activity {
      * Source: https://www.journaldev.com/10416/android-listview-with-custom-adapter-example-tutorial
      *
      */
-    private class RepresentativeListAdapter extends ArrayAdapter<Official>{
+    private class RepresentativeListAdapter extends ArrayAdapter<Official> implements AdapterView.OnItemClickListener{
 
         private Vector<Official> officials;
         private Context mContext;
@@ -386,30 +387,34 @@ public class RepresentativeActivity extends Activity {
             ( (View) listViewItem.findViewById(R.id.view_party_bar)).setBackgroundColor(color);
 
             // set the email button
-            ( (Button) listViewItem.findViewById(R.id.button_email_official)).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!official.getEmailAddress().equals("")){
-                        MessageHelper messageHelper = new MessageHelper(getApplicationContext());
-                        messageHelper.startEmailActivity(official.getEmailAddress(), "Email to " + official.getName(), "");
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Email not available", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
+//            ( (Button) listViewItem.findViewById(R.id.button_email_official)).setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if (!official.getEmailAddress().equals("")){
+//                        MessageHelper messageHelper = new MessageHelper(getApplicationContext());
+//                        messageHelper.startEmailActivity(official.getEmailAddress(), "Email to " + official.getName(), "");
+//                    } else {
+//                        Toast.makeText(getApplicationContext(), "Email not available", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            });
+//
+//            // set the phone button
+//            ( (Button) listViewItem.findViewById(R.id.button_phone_official)).setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if (!official.getPhoneNumber().equals("")){
+//                        MessageHelper messageHelper = new MessageHelper(getApplicationContext());
+//                        messageHelper.startCallActivity(thisActivity, official.getPhoneNumber());
+//                    } else {
+//                        Toast.makeText(getApplicationContext(), "Phone not available", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            });
 
-            // set the phone button
-            ( (Button) listViewItem.findViewById(R.id.button_phone_official)).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!official.getPhoneNumber().equals("")){
-                        MessageHelper messageHelper = new MessageHelper(getApplicationContext());
-                        messageHelper.startCallActivity(thisActivity, official.getPhoneNumber());
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Phone not available", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
+
+            // register for the floating context menu
+//            registerForContextMenu(convertView);
 
 //            officialImageViewVector.add(imageView);
 //            Log.i(TAG_REP_ACT, "2 officialImageViewVector = " + officialImageViewVector);
@@ -453,6 +458,10 @@ public class RepresentativeActivity extends Activity {
         }
 
 
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Log.i(TAG_REP_ACT, "GOT IT!");
+        }
     }
 
     /**
@@ -549,6 +558,15 @@ public class RepresentativeActivity extends Activity {
                     ", phoneNumber = " + this.phoneNumber + "\n" +
                     ", partyAffiliation = " + this.partyAffiliation + "\n\n";
         }
+
+        public String getInformation(){
+            return this.name + "\n" +
+                    "Position: " + this.position + "\n" +
+                    "Phone: " + this.phoneNumber + "\n" +
+                    "Email: " + this.emailAddress + "\n" +
+                    "Political Party: " + this.partyAffiliation + "\n"
+                    + "\n\n - Rake";
+        }
     }
 
     /**
@@ -607,13 +625,6 @@ public class RepresentativeActivity extends Activity {
 
         @Override
         protected void onProgressUpdate(Integer... values) {
-//            int index = values[0];
-//            Log.i(TAG_REP_ACT, "index = " + index);
-//            Log.i(TAG_REP_ACT, "officialDrawableVector.size() = " + officialDrawableVector.size());
-//            Log.i(TAG_REP_ACT, "officialImageViewVector.size() = " + officialImageViewVector.size());
-//            if ( officialDrawableVector.get(index) != null ){
-//                officialImageViewVector.get(index).setBackground(officialDrawableVector.get(index));
-//            }
             super.onProgressUpdate(values);
         }
 
@@ -621,6 +632,8 @@ public class RepresentativeActivity extends Activity {
         protected void onPostExecute(Void aVoid) {
             repAdapter = new RepresentativeListAdapter(getApplicationContext(), R.layout.rep_row_item, R.id.listView_reps, officialsVector);
             officialsListView.setAdapter(repAdapter);
+//            officialsListView.setOnItemClickListener(new OfficialsItemClickedExample());
+            registerForContextMenu(officialsListView);
 
             rawTextTextView.setText("Found Address \"" + address + "\"");
             super.onPostExecute(aVoid);
@@ -658,6 +671,68 @@ public class RepresentativeActivity extends Activity {
         }
     }
 
+    // ============================
+    // ==== CONTEXT MENU ITEMS ====
+    // ============================
+    Official curr;
+    /**
+     * From Android Docs - https://developer.android.com/guide/topics/ui/menus
+     * Inspiration - https://stackoverflow.com/questions/18632331/using-contextmenu-with-listview-in-android#_=_
+     * @param menu
+     * @param v
+     * @param menuInfo
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        Log.i(TAG_REP_ACT, "HEY MAN!");
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.rep_context_menu, menu);
+        if (v.getId() == R.id.listView_reps) {
+            ListView lv = (ListView) v;
+            AdapterView.AdapterContextMenuInfo acmi = (AdapterView.AdapterContextMenuInfo) menuInfo;
+            Official obj = (Official) lv.getItemAtPosition(acmi.position);
+            curr = obj;
+        }
+    }
 
-
+    /**
+     * From Android Docs - https://developer.android.com/guide/topics/ui/menus
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        Log.i(TAG_REP_ACT,"onContextItemSelected");
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        MessageHelper messageHelper = new MessageHelper(getApplicationContext());
+        switch (item.getItemId()) {
+            case R.id.call:
+                if (!curr.getPhoneNumber().equals("")){
+                    messageHelper.startCallActivity(thisActivity, curr.getPhoneNumber());
+                } else {
+                    Toast.makeText(getApplicationContext(), "Phone not available", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            case R.id.Email:
+                if (!curr.getEmailAddress().equals("")){
+                    messageHelper.startEmailActivity(curr.getEmailAddress(), "Email to " + curr.getName(), "");
+                } else {
+                    Toast.makeText(getApplicationContext(), "Email not available", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            case R.id.text_information:
+                if (!curr.getPhoneNumber().equals("")){
+                    messageHelper.startTextAcitivity("", curr.getInformation());
+                } else {
+                    Toast.makeText(getApplicationContext(), "Phone not available", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            case R.id.email_information:
+                messageHelper.startEmailActivity("", "Information about " + curr.getName(), curr.getInformation());
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
 }

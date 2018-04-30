@@ -63,8 +63,10 @@ public class MessageHelper {
      * @return
      */
     public void startTextAcitivity(String phoneNumber, String textMessage) {
-        Intent phoneIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("sms:" + phoneNumber));
-        phoneIntent.putExtra("sms_text", textMessage);
+        Intent phoneIntent = new Intent(Intent.ACTION_VIEW);
+        phoneIntent.setData(Uri.parse("sms:"));
+        phoneIntent.putExtra("address", phoneNumber);
+        phoneIntent.putExtra("sms_body", textMessage);
         this.context.startActivity(phoneIntent);
     }
 

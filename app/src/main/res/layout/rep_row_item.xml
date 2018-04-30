@@ -12,9 +12,10 @@
         android:id="@+id/view_party_bar"
         android:layout_width="match_parent"
         android:layout_height="5dp"
-        android:background="#b043f9">
-
-    </View>
+        android:background="#b043f9"
+        android:focusableInTouchMode="false"
+        android:clickable="false"
+        android:focusable="false"/>
 
     <ImageView
         android:id="@+id/imageview_official_photo"
@@ -24,7 +25,10 @@
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view_party_bar" />
+        app:layout_constraintTop_toBottomOf="@+id/view_party_bar"
+        android:focusableInTouchMode="false"
+        android:clickable="false"
+        android:focusable="false" />
 
     <TextView
         android:id="@+id/textview_official_name"
@@ -37,7 +41,10 @@
         android:text="Offical name not found"
         android:textSize="26sp"
         app:layout_constraintStart_toEndOf="@+id/imageview_official_photo"
-        app:layout_constraintTop_toBottomOf="@+id/view_party_bar" />
+        app:layout_constraintTop_toBottomOf="@+id/view_party_bar"
+        android:focusableInTouchMode="false"
+        android:clickable="false"
+        android:focusable="false"/>
 
     <TextView
         android:id="@+id/textview_official_position"
@@ -49,27 +56,36 @@
         android:layout_toEndOf="@+id/imageview_official_photo"
         android:text="Offical position not found"
         app:layout_constraintStart_toEndOf="@+id/imageview_official_photo"
-        app:layout_constraintTop_toBottomOf="@+id/textview_official_name" />
+        app:layout_constraintTop_toBottomOf="@+id/textview_official_name"
+        android:focusableInTouchMode="false"
+        android:clickable="false"
+        android:focusable="false"/>
 
-    <Button
-        android:id="@+id/button_email_official"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="Email"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+    <!--<Button-->
+        <!--android:id="@+id/button_email_official"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:text="Email"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--android:focusableInTouchMode="false"-->
+        <!--android:clickable="false"-->
+        <!--android:focusable="false"  />-->
 
-    <Button
-        android:id="@+id/button_phone_official"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="Call"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button_email_official" />
+    <!--<Button-->
+        <!--android:id="@+id/button_phone_official"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:text="Call"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintEnd_toStartOf="@+id/button_email_official"-->
+        <!--android:focusableInTouchMode="false"-->
+        <!--android:clickable="false"-->
+        <!--android:focusable="false" />-->
 
 
 </android.support.constraint.ConstraintLayout>
