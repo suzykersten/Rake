@@ -8,32 +8,36 @@
     android:layout_height="100dp"
     android:background="#AAA">
 
+    <View
+        android:id="@+id/view_party_bar"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:background="#b043f9">
+
+    </View>
+
     <ImageView
         android:id="@+id/imageview_official_photo"
-        android:scaleType="fitCenter"
         android:layout_width="70dp"
-        android:layout_height="match_parent"
+        android:layout_height="91dp"
         android:layout_margin="5dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/view_party_bar" />
 
     <TextView
         android:id="@+id/textview_official_name"
         android:layout_width="wrap_content"
-        android:layout_height="37dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_toEndOf="@+id/imageview_official_photo"
+        android:layout_margin="5dp"
         android:fontFamily="serif"
         android:text="Offical name not found"
         android:textSize="26sp"
         app:layout_constraintStart_toEndOf="@+id/imageview_official_photo"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/view_party_bar" />
 
     <TextView
         android:id="@+id/textview_official_position"

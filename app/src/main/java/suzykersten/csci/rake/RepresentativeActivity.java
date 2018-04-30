@@ -381,6 +381,10 @@ public class RepresentativeActivity extends Activity {
                 }
             }
 
+            // get and set the color for the official's party affiliation
+            int color = getPartyColorFromParty(official.getPartyAffiliation());
+            ( (View) listViewItem.findViewById(R.id.view_party_bar)).setBackgroundColor(color);
+
             // set the email button
             ( (Button) listViewItem.findViewById(R.id.button_email_official)).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -411,6 +415,41 @@ public class RepresentativeActivity extends Activity {
 //            Log.i(TAG_REP_ACT, "2 officialImageViewVector = " + officialImageViewVector);
 
             return listViewItem;
+        }
+
+        private static final int COLOR_REPUBLICAN = 0xff983d3d;
+        private static final int COLOR_DEMOCRAT = 0xff232066;
+        private static final int COLOR_LIBERTARIAN = 0xffD4AF37;
+        private static final int COLOR_GREEN_PARTY = 0xff00a95c;
+        private static final int COLOR_INDEPENDENT = 0xffb342f4;
+        private static final int COLOR_UNKNOWN = 0xff7c7c7c;
+
+        private int getPartyColorFromParty(String party){
+            int color = COLOR_UNKNOWN;
+            switch (party){
+                case "Democratic":
+                    color = COLOR_DEMOCRAT;
+                    break;
+                case "Republican":
+                    color = COLOR_REPUBLICAN;
+                    break;
+                case "Independent":
+                    color = COLOR_INDEPENDENT;
+                    break;
+                case "Libertarian":
+                    color = COLOR_LIBERTARIAN;
+                    break;
+                case "Green":
+                    color = COLOR_GREEN_PARTY;
+                    break;
+                case "Unknown":
+                    color = COLOR_UNKNOWN;
+                    break;
+                default:
+                    Log.i(TAG_REP_ACT, "Weird color showed up!");
+                    color = COLOR_UNKNOWN;
+            }
+            return color;
         }
 
 
@@ -503,7 +542,12 @@ public class RepresentativeActivity extends Activity {
 
         @Override
         public String toString() {
-            return "name = " + this.name + ", pos = " + this.position + ", photoUrl = " + this.photoUrl + ", emailAddress = " + this.emailAddress + ", phoneNumber = " + this.phoneNumber;
+            return "name = " + this.name + "\n" +
+                    ", pos = " + this.position + "\n" +
+                    ", photoUrl = " + this.photoUrl + "\n" +
+                    ", emailAddress = " + this.emailAddress + "\n" +
+                    ", phoneNumber = " + this.phoneNumber + "\n" +
+                    ", partyAffiliation = " + this.partyAffiliation + "\n\n";
         }
     }
 
