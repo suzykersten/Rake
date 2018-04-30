@@ -171,7 +171,7 @@ public class RepresentativeActivity extends Activity {
                     name = jsonArrayOfficials.getJSONObject(i).get("name").toString();
                     try {
                         photoUrl = jsonArrayOfficials.getJSONObject(i).get("photoUrl").toString();
-                    } catch (JSONException e){
+                    } catch (Exception e){
                         Log.e(TAG_REP_ACT, "no val for photo URL");
                         photoUrl = "";
                     }
@@ -180,7 +180,7 @@ public class RepresentativeActivity extends Activity {
                     String email;
                     try {
                         email = jsonArrayOfficials.getJSONObject(i).get("emails").toString().trim().split("[\\[,\\] ]")[1];
-                    } catch (JSONException e){
+                    } catch (Exception e){
                         Log.e(TAG_REP_ACT, "no val for emails");
                         email = "";
                     }
@@ -190,7 +190,7 @@ public class RepresentativeActivity extends Activity {
                     String phone;
                     try {
                         phone = jsonArrayOfficials.getJSONObject(i).get("phones").toString().trim().split("[\\[,\\]]")[1];
-                    } catch (JSONException e){
+                    } catch (Exception e){
                         Log.e(TAG_REP_ACT, "no val for emails");
                         phone = "";
                     }
@@ -200,7 +200,7 @@ public class RepresentativeActivity extends Activity {
                     try {
                         party = jsonArrayOfficials.getJSONObject(i).get("party").toString().trim();
                         Log.i(TAG_REP_ACT, "party = " + party);
-                    } catch (NullPointerException e){
+                    } catch (Exception e){
                         Log.e(TAG_REP_ACT, "Error party not found. party = " + party);
                         e.printStackTrace();
                     }
@@ -723,7 +723,7 @@ public class RepresentativeActivity extends Activity {
                 return true;
             case R.id.text_information:
                 if (!curr.getPhoneNumber().equals("")){
-                    messageHelper.startTextAcitivity("", curr.getInformation());
+                    messageHelper.startTextAcitivity(thisActivity, "", curr.getInformation());
                 } else {
                     Toast.makeText(getApplicationContext(), "Phone not available", Toast.LENGTH_SHORT).show();
                 }

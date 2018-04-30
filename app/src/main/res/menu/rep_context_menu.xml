@@ -5,7 +5,7 @@
     <item android:id="@+id/Email"
         android:title="Email Representative"/>
     <item android:id="@+id/text_information"
-        android:title="Text information"/>
+        android:title="Text Information"/>
     <item android:id="@+id/email_information"
-        android:title="Email information"/>
+        android:title="Email Information"/>
 </menu>

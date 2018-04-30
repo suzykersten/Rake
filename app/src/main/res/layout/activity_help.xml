@@ -5,29 +5,64 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#CCC"
     tools:context="suzykersten.csci.rake.HelpActivity">
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp"
-        android:text="@string/GovAbbrevs" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp"
-        android:text="@string/voting" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp"
-        android:text="@string/HowBillBecomesALaw" />
+            <TextView
+                android:id="@+id/textView2"
+                android:textSize="24sp"
+                android:textColor="#111"
+                android:layout_margin="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="@string/GovAbbrevs" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:textColor="#111"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="@string/voting"
+                android:textSize="24sp" />
+
+            <Button
+                android:id="@+id/button_learn_vote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Learn how to Vote"/>
+
+            <TextView
+                android:id="@+id/textView4"
+                android:textSize="24sp"
+                android:textColor="#111"
+                android:layout_margin="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="@string/HowBillBecomesALaw" />
+
+            <Button
+                android:id="@+id/button_go"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Go"/>
+
+        </LinearLayout>
+
+    </ScrollView>
 </LinearLayout>

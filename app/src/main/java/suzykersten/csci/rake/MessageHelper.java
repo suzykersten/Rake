@@ -62,7 +62,9 @@ public class MessageHelper {
      * @param textMessage
      * @return
      */
-    public void startTextAcitivity(String phoneNumber, String textMessage) {
+    public void startTextAcitivity(Activity activity, String phoneNumber, String textMessage) {
+        getPermission(activity, Manifest.permission.ACCESS_NETWORK_STATE);
+        getPermission(activity, Manifest.permission.INTERNET);
         Intent phoneIntent = new Intent(Intent.ACTION_VIEW);
         phoneIntent.setData(Uri.parse("sms:"));
         phoneIntent.putExtra("address", phoneNumber);
@@ -103,5 +105,26 @@ public class MessageHelper {
         Intent phoneIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("sms:" + phoneNumber));
         phoneIntent.putExtra("sms_text", textMessage);
         return phoneIntent;
+    }
+
+    private boolean getPermission(Activity activity, String permission){
+        if (ActivityCompat.checkSelfPermission(this.context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            Log.i(TAG_MESSAGE_HELPER, "You don't have permission, sorry bud.");
+
+            //ask for permission
+            String [] permissions = {permission};
+            ActivityCompat.requestPermissions(activity, permissions, 0);
+
+
+            return true;
+        }
+        return false;
     }
 }
