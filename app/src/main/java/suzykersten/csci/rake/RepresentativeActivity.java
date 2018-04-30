@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,6 +23,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -56,6 +59,8 @@ public class RepresentativeActivity extends Activity {
     private Vector<Drawable> officialDrawableVector;
 
     private GetPhotoFromURLTask getPhotoFromURLTask;
+    private Activity thisActivity = this;
+    private RepresentativeListAdapter repAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +75,12 @@ public class RepresentativeActivity extends Activity {
         findViewById(R.id.button_get_reps_for_addr).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                closeKeyboard();
 
                 officialDrawableVector.clear();
                 officialsVector.clear();
                 officialImageViewVector.clear();
+                if (repAdapter != null) repAdapter.notifyDataSetChanged();
 
                 if ( getPhotoFromURLTask != null ){
                     getPhotoFromURLTask.cancel(true);
@@ -115,6 +122,17 @@ public class RepresentativeActivity extends Activity {
     }
 
     /**
+     * Inspiration - https://stackoverflow.com/questions/1109022/close-hide-the-android-soft-keyboard
+     */
+    public void closeKeyboard(){
+        View view = this.getCurrentFocus();
+        if (view != null){
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    /**
      * Setup a listener class for getting the JSON response of the address-based Representatives
      */
     private class JsonRepResListener implements Response.Listener<JSONObject>{
@@ -129,7 +147,7 @@ public class RepresentativeActivity extends Activity {
 
             // set the upper textview to the string (RAW) JSON response
 //            rawTextTextView.setText(response.toString());
-            rawTextTextView.setText("Found Address \"" + address + "\" \n Loading...");
+            rawTextTextView.setText("Found Address \"" + address + "\" \nLoading...");
 
             // fill a vector with officials
             try {
@@ -176,7 +194,16 @@ public class RepresentativeActivity extends Activity {
                     }
                     Log.i(TAG_REP_ACT, "phone = " + phone);
 
-                    officialsVector.add( new Official(name, photoUrl, email, phone) );
+                    String party = "";
+                    try {
+                        party = jsonArrayOfficials.getJSONObject(i).get("party").toString().trim();
+                        Log.i(TAG_REP_ACT, "party = " + party);
+                    } catch (NullPointerException e){
+                        Log.e(TAG_REP_ACT, "Error party not found. party = " + party);
+                        e.printStackTrace();
+                    }
+
+                    officialsVector.add( new Official(name, photoUrl, email, phone, party) );
 
 //                    if (!photoUrl.equals(null) || !photoUrl.equals("")){
 //                        Drawable officalPhoto = getPhotoFromUrl(photoUrl);
@@ -354,12 +381,29 @@ public class RepresentativeActivity extends Activity {
                 }
             }
 
-            // set the button
+            // set the email button
             ( (Button) listViewItem.findViewById(R.id.button_email_official)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    MessageHelper messageHelper = new MessageHelper(getApplicationContext());
-                    messageHelper.startEmailActivity(official.getEmailAddress(), "Email to " + official.getName(), "");
+                    if (!official.getEmailAddress().equals("")){
+                        MessageHelper messageHelper = new MessageHelper(getApplicationContext());
+                        messageHelper.startEmailActivity(official.getEmailAddress(), "Email to " + official.getName(), "");
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Email not available", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            // set the phone button
+            ( (Button) listViewItem.findViewById(R.id.button_phone_official)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!official.getPhoneNumber().equals("")){
+                        MessageHelper messageHelper = new MessageHelper(getApplicationContext());
+                        messageHelper.startCallActivity(thisActivity, official.getPhoneNumber());
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Phone not available", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
@@ -381,6 +425,7 @@ public class RepresentativeActivity extends Activity {
         private String photoUrl;
         private String emailAddress;
         private String phoneNumber;
+        private String partyAffiliation;
 
         public Official(String name, String photoUrl, String position){
             this.name = name;
@@ -398,6 +443,14 @@ public class RepresentativeActivity extends Activity {
             this.photoUrl = photoUrl;
             this.emailAddress = emailAddress;
             this.phoneNumber = phoneNumber;
+        }
+
+        public Official(String name, String photoUrl, String emailAddress, String phoneNumber, String partyAffiliation){
+            this.name = name;
+            this.photoUrl = photoUrl;
+            this.emailAddress = emailAddress;
+            this.phoneNumber = phoneNumber;
+            this.partyAffiliation = partyAffiliation;
         }
 
         public String getName() {
@@ -440,6 +493,14 @@ public class RepresentativeActivity extends Activity {
             this.phoneNumber = phoneNumber;
         }
 
+        public String getPartyAffiliation() {
+            return partyAffiliation;
+        }
+
+        public void setPartyAffiliation(String partyAffiliation) {
+            this.partyAffiliation = partyAffiliation;
+        }
+
         @Override
         public String toString() {
             return "name = " + this.name + ", pos = " + this.position + ", photoUrl = " + this.photoUrl + ", emailAddress = " + this.emailAddress + ", phoneNumber = " + this.phoneNumber;
@@ -455,6 +516,7 @@ public class RepresentativeActivity extends Activity {
         Drawable drawable;
         int defaultImageRes;
         Drawable defaultDrawable;
+        final int REQUIRED_STRING_SIZE = 5;
 
         @Override
         protected void onPreExecute() {
@@ -471,7 +533,6 @@ public class RepresentativeActivity extends Activity {
         @Override
         protected Void doInBackground(Void... voids) {
             String photoUrl = "";
-            final int REQUIRED_STRING_SIZE = 5;
             for (int i = 0; i < officials.size(); i++){
                 Log.i(TAG_REP_ACT, "officials.get(i).getPhotoUrl() = " + officials.get(i).getPhotoUrl());
                 Log.i(TAG_REP_ACT, "officials.get(i).getPhotoUrl().equals(\"\") = " + officials.get(i).getPhotoUrl().equals(""));
@@ -479,7 +540,13 @@ public class RepresentativeActivity extends Activity {
                 photoUrl = officials.get(i).getPhotoUrl();
 
                 if ( !photoUrl.equals("") || photoUrl.length() > REQUIRED_STRING_SIZE){
-                    drawable = scaleDownDrawable(getPhotoFromUrl(officials.get(i).getPhotoUrl()));
+                    try {
+                        drawable = scaleDownDrawable(getPhotoFromUrl(officials.get(i).getPhotoUrl()));
+                    } catch (NullPointerException e){
+                        Log.e(TAG_REP_ACT, "Failure to get drawble from URL");
+                        e.printStackTrace();
+                        drawable = defaultDrawable;
+                    }
 //                    drawable = getPhotoFromUrl(officials.get(i).getPhotoUrl());
                     officialDrawableVector.add(drawable);
                 } else {
@@ -508,7 +575,8 @@ public class RepresentativeActivity extends Activity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            officialsListView.setAdapter(new RepresentativeListAdapter(getApplicationContext(), R.layout.rep_row_item, R.id.listView_reps, officialsVector));
+            repAdapter = new RepresentativeListAdapter(getApplicationContext(), R.layout.rep_row_item, R.id.listView_reps, officialsVector);
+            officialsListView.setAdapter(repAdapter);
 
             rawTextTextView.setText("Found Address \"" + address + "\"");
             super.onPostExecute(aVoid);
@@ -529,9 +597,6 @@ public class RepresentativeActivity extends Activity {
                 e.printStackTrace();
             }
 
-            if (drawable == null) {
-                Log.i(TAG_REP_ACT, "drawable is null!");
-            }
             return drawable;
         }
 

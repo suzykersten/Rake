@@ -4,10 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#CCC"
     tools:context="suzykersten.csci.rake.RepresentativeActivity">
 
     <EditText
         android:id="@+id/editText_address"
+        android:textSize="18sp"
         android:layout_width="248dp"
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
@@ -34,9 +36,9 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="TextView"
+            android:text="Enter an address and press search"
             android:textColor="@android:color/black"
-            android:textSize="12sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -66,6 +68,8 @@
 
     <TextView
         android:id="@+id/textView_label_address"
+        android:textSize="18sp"
+        android:textColor="#111"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
