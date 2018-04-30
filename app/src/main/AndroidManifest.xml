@@ -21,7 +21,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".RepresentativeActivity" />
-        <activity android:name=".BillActivity"></activity>
+        <activity android:name=".BillActivity" />
+        <activity android:name=".HelpActivity"></activity>
     </application>
 
 </manifest>

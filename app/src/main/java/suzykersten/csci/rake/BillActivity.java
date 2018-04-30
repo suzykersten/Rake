@@ -12,6 +12,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -98,6 +100,24 @@ public class BillActivity extends Activity {
         ListView listView = findViewById(R.id.listView_bills);
         dlBills = new DownloadBills(urls.get(buttonId), listView);
         dlBills.execute();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.global, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.help:
+                startActivity(new Intent(this, HelpActivity.class));
+                return true;
+
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
 
