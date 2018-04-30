@@ -1,15 +1,15 @@
 <resources>
     <string name="app_name">Rake</string>
     <string name="GovAbbrevs">
-        There are some abbreviations used in this app, shown as follows:
-        HCONRES - House Concurrent Resolution
-        HJRES - House Joint Resolution
-        HR - House Bill
-        HRES - House Simple Resolution
-        S - Senate Bill
-        SCONRES - Senate Concurrent Resolution
-        SJRES - Senate Joint Resolution
-        SRES - Senate Simple Resolution
+        There are some abbreviations used in this app, shown as follows:&#xD;&#xA;
+        HCONRES - House Concurrent Resolution&#xD;&#xA;
+        HJRES - House Joint Resolution&#xD;&#xA;
+        HR - House Bill&#xD;&#xA;
+        HRES - House Simple Resolution&#xD;&#xA;
+        S - Senate Bill&#xD;&#xA;
+        SCONRES - Senate Concurrent Resolution&#xD;&#xA;
+        SJRES - Senate Joint Resolution&#xD;&#xA;
+        SRES - Senate Simple Resolution&#xD;&#xA;
     </string>
     <string name="voting">
         Voting is an important part of democracy. Learn the basics of voter registration
