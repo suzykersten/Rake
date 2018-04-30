@@ -24,12 +24,14 @@
     <TextView
         android:id="@+id/textview_official_name"
         android:layout_width="wrap_content"
-        android:layout_height="22dp"
+        android:layout_height="37dp"
         android:layout_alignParentTop="true"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_toEndOf="@+id/imageview_official_photo"
+        android:fontFamily="serif"
         android:text="Offical name not found"
+        android:textSize="26sp"
         app:layout_constraintStart_toEndOf="@+id/imageview_official_photo"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -43,6 +45,26 @@
         android:text="Offical position not found"
         app:layout_constraintStart_toEndOf="@+id/imageview_official_photo"
         app:layout_constraintTop_toBottomOf="@+id/textview_official_name" />
+
+    <Button
+        android:id="@+id/button_email_official"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Email"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/button_phone_official"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Call"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_email_official" />
 
 
 </android.support.constraint.ConstraintLayout>

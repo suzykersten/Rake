@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ScaleDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,22 +17,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -132,7 +129,7 @@ public class RepresentativeActivity extends Activity {
 
             // set the upper textview to the string (RAW) JSON response
 //            rawTextTextView.setText(response.toString());
-            rawTextTextView.setText("Found Address \"" + address + "\"");
+            rawTextTextView.setText("Found Address \"" + address + "\" \n Loading...");
 
             // fill a vector with officials
             try {
@@ -159,7 +156,27 @@ public class RepresentativeActivity extends Activity {
                         photoUrl = "";
                     }
 
-                    officialsVector.add( new Official(name, photoUrl) );
+                    // add email if exists
+                    String email;
+                    try {
+                        email = jsonArrayOfficials.getJSONObject(i).get("emails").toString().trim().split("[\\[,\\] ]")[1];
+                    } catch (JSONException e){
+                        Log.e(TAG_REP_ACT, "no val for emails");
+                        email = "";
+                    }
+                    Log.i(TAG_REP_ACT, "email = " + email);
+
+                    // add phone if exists
+                    String phone;
+                    try {
+                        phone = jsonArrayOfficials.getJSONObject(i).get("phones").toString().trim().split("[\\[,\\]]")[1];
+                    } catch (JSONException e){
+                        Log.e(TAG_REP_ACT, "no val for emails");
+                        phone = "";
+                    }
+                    Log.i(TAG_REP_ACT, "phone = " + phone);
+
+                    officialsVector.add( new Official(name, photoUrl, email, phone) );
 
 //                    if (!photoUrl.equals(null) || !photoUrl.equals("")){
 //                        Drawable officalPhoto = getPhotoFromUrl(photoUrl);
@@ -220,6 +237,13 @@ public class RepresentativeActivity extends Activity {
 
         }
     }
+
+//    private String JSONObjectToString(JSONObject jsonObject){
+//        String strJSONObject =
+////        officeName = jsonObject.get("name").toString();
+////        jsonArrayOfficalIndices = jsonObject.get("officialIndices").toString().trim();
+////        strings = jsonArrayOfficalIndices.split("[\\[,\\] ]");
+//    }
 
     private class JsonRepResErrListener implements Response.ErrorListener {
 
@@ -300,7 +324,7 @@ public class RepresentativeActivity extends Activity {
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 
-            Official official = officials.get(position);
+            final Official official = officials.get(position);
             Log.i(TAG_REP_ACT, "official = " + official);
 
             // build list item
@@ -326,8 +350,19 @@ public class RepresentativeActivity extends Activity {
                     imageView.setBackground(officialDrawableVector.get(position));
                 } catch (Exception e){
                     Log.e(TAG_REP_ACT, "Something went real bad!");
+                    e.printStackTrace();
                 }
             }
+
+            // set the button
+            ( (Button) listViewItem.findViewById(R.id.button_email_official)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MessageHelper messageHelper = new MessageHelper(getApplicationContext());
+                    messageHelper.startEmailActivity(official.getEmailAddress(), "Email to " + official.getName(), "");
+                }
+            });
+
 //            officialImageViewVector.add(imageView);
 //            Log.i(TAG_REP_ACT, "2 officialImageViewVector = " + officialImageViewVector);
 
@@ -344,6 +379,8 @@ public class RepresentativeActivity extends Activity {
         private String name;
         private String position;
         private String photoUrl;
+        private String emailAddress;
+        private String phoneNumber;
 
         public Official(String name, String photoUrl, String position){
             this.name = name;
@@ -354,6 +391,13 @@ public class RepresentativeActivity extends Activity {
         public Official(String name, String photoUrl){
             this.name = name;
             this.photoUrl = photoUrl;
+        }
+
+        public Official(String name, String photoUrl, String emailAddress, String phoneNumber){
+            this.name = name;
+            this.photoUrl = photoUrl;
+            this.emailAddress = emailAddress;
+            this.phoneNumber = phoneNumber;
         }
 
         public String getName() {
@@ -380,9 +424,25 @@ public class RepresentativeActivity extends Activity {
             this.photoUrl = photoUrl;
         }
 
+        public String getEmailAddress() {
+            return emailAddress;
+        }
+
+        public void setEmailAddress(String emailAddress) {
+            this.emailAddress = emailAddress;
+        }
+
+        public String getPhoneNumber() {
+            return phoneNumber;
+        }
+
+        public void setPhoneNumber(String phoneNumber) {
+            this.phoneNumber = phoneNumber;
+        }
+
         @Override
         public String toString() {
-            return "name = " + this.name + ", pos = " + this.position + ", photoUrl = " + this.photoUrl;
+            return "name = " + this.name + ", pos = " + this.position + ", photoUrl = " + this.photoUrl + ", emailAddress = " + this.emailAddress + ", phoneNumber = " + this.phoneNumber;
         }
     }
 
@@ -450,6 +510,7 @@ public class RepresentativeActivity extends Activity {
         protected void onPostExecute(Void aVoid) {
             officialsListView.setAdapter(new RepresentativeListAdapter(getApplicationContext(), R.layout.rep_row_item, R.id.listView_reps, officialsVector));
 
+            rawTextTextView.setText("Found Address \"" + address + "\"");
             super.onPostExecute(aVoid);
         }
 
